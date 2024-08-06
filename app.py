@@ -1,8 +1,8 @@
-# app.py
 from flask import Flask, request, send_file, render_template, jsonify
 import os
 from pixel_to_vector import pixel_to_vector
 import tempfile
+import io
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
@@ -35,20 +35,19 @@ def convert():
         _, temp_input_path = tempfile.mkstemp(suffix='.png')
         file.save(temp_input_path)
         
-        # Create temporary output file
-        _, temp_output_path = tempfile.mkstemp(suffix='.svg')
-        
         # Run conversion
-        pixel_to_vector(temp_input_path, num_colors, temp_output_path, smoothing, turdsize)
+        svg_content = pixel_to_vector(temp_input_path, num_colors, 'output.svg', smoothing, turdsize)
+        
+        # Create a file-like object from the SVG content
+        svg_file = io.BytesIO(svg_content.encode('utf-8'))
         
         # Send file to user
-        return send_file(temp_output_path, as_attachment=True, download_name='converted.svg', mimetype='image/svg+xml')
+        return send_file(svg_file, mimetype='image/svg+xml', as_attachment=True, download_name='converted.svg')
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
         # Clean up temporary files
         os.remove(temp_input_path)
-        os.remove(temp_output_path)
 
 if __name__ == '__main__':
     app.run(debug=True)
