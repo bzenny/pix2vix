@@ -20,7 +20,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libagg-dev
+        sudo apt-get install -y libagg-dev libpotrace-dev
     - name: Display Python version and installed packages
       run: |
         python --version
@@ -30,9 +30,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         pip install numpy pillow scikit-learn svgwrite flask
+    - name: Debug environment
+      run: |
+        ls -R /usr/include
+        echo $LD_LIBRARY_PATH
+        echo $LIBRARY_PATH
+        echo $CPATH
     - name: Install pypotrace
       run: |
-        pip install pypotrace
+        CFLAGS="-I/usr/include/potrace" pip install pypotrace
     - name: Install project dependencies
       run: |
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
@@ -47,6 +53,3 @@ jobs:
         python app.py &
         sleep 5
         curl -f http://localhost:5000 || (echo "Failed to connect to app" && exit 1)
-        python app.py &
-        sleep 5
-        curl http://localhost:5000 || (echo "Failed to connect to app" && exit 1)
