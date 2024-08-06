@@ -1,0 +1,7 @@
+# requirements.txt
+flask==2.1.0
+numpy==1.21.0
+pillow==8.3.1
+scikit-learn==0.24.2
+svgwrite==1.4.1
+pypotrace==0.3.0
